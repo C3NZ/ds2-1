@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 
 dataframe = pd.read_csv("diabetes.csv")
 
@@ -92,6 +92,9 @@ def compute_matrix_score(confusion):
     return accuracy, precision, recall, f1_score
 
 
+# Compute the matrix score
+print(compute_matrix_score(confusion))
+
 # Gives us an accuracy score of our classifier
 print(metrics.accuracy_score(y_test, y_pred))
 
@@ -103,5 +106,33 @@ y_pred_prob = logreg.predict_proba(X_test)
 
 plt.hist(y_pred_prob[:, 1], bins=8)
 plt.show()
-# Compute the matrix score
+
+print(y_train.value_counts())
+# Obtain threshold l
+threshold = y_train.value_counts()[1] / len(y_train)
+threshold = 0.348000000
+
+
+def compute_y_labels(y_pred_prob):
+    threshold_count = []
+    for num in y_pred_prob[:, 1]:
+        if num > threshold:
+            threshold_count.append(1)
+        else:
+            threshold_count.append(0)
+    return threshold_count
+
+
+print(compute_y_labels(y_pred_prob))
+
+# Create the new confusion matrix.
+new_confusion = metrics.confusion_matrix(y_test, compute_y_labels(y_pred_prob))
+print(y_pred_prob[:, 1])
+
+# Print out the old and new confusion matricies.
+print(confusion)
+print(new_confusion)
+
+# Compute the scores of each matrix.
 print(compute_matrix_score(confusion))
+print(compute_matrix_score(new_confusion))
